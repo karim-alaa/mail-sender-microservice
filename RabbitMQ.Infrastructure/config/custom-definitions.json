@@ -1,0 +1,44 @@
+ {
+   "queues":[
+      {
+         "name":"request-queue",
+         "vhost":"/",
+         "durable":true,
+         "auto_delete":false,
+         "arguments":{
+            "x-queue-type":"quorum"
+         }
+      },
+      {
+         "name":"mail-queue",
+         "vhost":"/",
+         "durable":true,
+         "auto_delete":false,
+         "arguments":{
+            "x-queue-type":"quorum"
+         }
+      }
+   ],
+   "bindings":[
+      {
+         "source":"retry-exchange",
+         "vhost":"/",
+         "destination":"mail-queue",
+         "destination_type":"queue",
+         "routing_key":"mail",
+         "arguments":{
+            
+         }
+      },
+      {
+         "source":"retry-exchange",
+         "vhost":"/",
+         "destination":"request-queue",
+         "destination_type":"queue",
+         "routing_key":"request",
+         "arguments":{
+            
+         }
+      }
+   ]
+}
