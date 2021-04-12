@@ -2,7 +2,7 @@
 Simple, high available microservices with RabbitMQ responsible for sending huge number of emails
 
 
-[High-Level Architecture](https://user-images.githubusercontent.com/29948653/114420264-75efcb00-9bb4-11eb-8d8e-cee832b9f9c7.png)
+![High-Level Architecture](https://user-images.githubusercontent.com/29948653/114420264-75efcb00-9bb4-11eb-8d8e-cee832b9f9c7.png)
 
 # Technologies
 * C#, Console App, Web API App
