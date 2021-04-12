@@ -17,6 +17,7 @@ Simple, high available microservices with RabbitMQ responsible for sending huge 
  - SQL Server 2019
  - .Net Core 5.0
  - Docker
+ - Postman
 
 # Instllation
 - Open powershell terminal in the root folder
