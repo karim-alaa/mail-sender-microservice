@@ -34,10 +34,12 @@ Simple, high available microservices with RabbitMQ responsible for sending huge 
 ```
 
 # Components
-  - RabbitMQ run as a cluster in three nodes (rabbit-1, rabbit-2, rabbit-3) - run as a containers
-  - Consumer - .Net Core 5.0 - run as a container
-  - Producer - .Net Core 5.0 - run as a container
-  - SQL Database - SQL Server - run as a container
+| Component  | Technology      | Deployment Approach
+|------------|-----------------|---------------------|
+| RabbitMQ | run as a cluster in three nodes (rabbit-1, rabbit-2, rabbit-3) | run as a containers
+|Consumer |.Net Core 5.0|run as a container|
+|Producer  |.Net Core 5.0|run as a container|
+|Database |SQL Server|run as a container|
          
 
 # Good to know
