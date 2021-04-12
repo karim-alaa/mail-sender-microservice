@@ -4,6 +4,7 @@ using MimeKit;
 using MimeKit.Text;
 using RabbitMQ.Consumer.Constants;
 using RabbitMQ.Consumer.Dtos;
+using RabbitMQ.Consumer.Dtos.Config;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,12 +23,13 @@ namespace RabbitMQ.Consumer.Services
     public class MailService : IMailService
     {
         public SmtpClient TEClient;
-        private static string TEMail => Credentials.MasterEmailAddress;
-        private static string TEPassword => Credentials.MasterEmailPassword;
-        private static int TEPort => Credentials.MasterEmailPort;
-        private static string TEHost => Credentials.MasterEmailHost;
 
-       
+        private readonly AppConfig _config;
+        public MailService(AppConfig config)
+        {
+            _config = config;
+        }
+
         public async Task<bool> SendMail(EmailDto emailDto)
         {
             var message = new MimeMessage
@@ -39,11 +41,11 @@ namespace RabbitMQ.Consumer.Services
                 }
             };
 
-            if (emailDto.From != TEMail)
+            if (emailDto.From != _config.Smtp.Username)
                 return false;
 
             // ignore from email right now!
-            message.From.Add(MailboxAddress.Parse(TEMail));
+            message.From.Add(MailboxAddress.Parse(_config.Smtp.Username));
 
             foreach(string to in emailDto.To) 
                 message.To.Add(MailboxAddress.Parse(to));
@@ -62,8 +64,8 @@ namespace RabbitMQ.Consumer.Services
             // SMTP Setup
             using var client = new SmtpClient();
             client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-            await client.ConnectAsync(TEHost, TEPort, SecureSocketOptions.StartTls);
-            await client.AuthenticateAsync(TEMail, TEPassword);
+            await client.ConnectAsync(_config.Smtp.Host, _config.Smtp.Port, SecureSocketOptions.StartTls);
+            await client.AuthenticateAsync(_config.Smtp.Username, _config.Smtp.Password);
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
 
@@ -83,15 +85,15 @@ namespace RabbitMQ.Consumer.Services
                 }
             };
 
-            message.From.Add(MailboxAddress.Parse(TEMail));
+            message.From.Add(MailboxAddress.Parse(_config.Smtp.Username));
 
-            message.To.Add(MailboxAddress.Parse(TEMail));
+            message.To.Add(MailboxAddress.Parse(_config.Smtp.Username));
 
             // SMTP Setup
             using var client = new SmtpClient();
             client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-            await client.ConnectAsync(TEHost, TEPort, SecureSocketOptions.StartTls);
-            await client.AuthenticateAsync(TEMail, TEPassword);
+            await client.ConnectAsync(_config.Smtp.Host, _config.Smtp.Port, SecureSocketOptions.StartTls);
+            await client.AuthenticateAsync(_config.Smtp.Username, _config.Smtp.Password);
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
         }

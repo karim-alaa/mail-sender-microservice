@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\WE DATA\\RabbitMQ\\Full Project\\RabbitMQ.Producer\\RabbitMQ.Producer\\RabbitMQ.Producer.csproj": {}
+    "D:\\WE DATA\\RabbitMQ\\Full Project\\mail-sender-microservice\\RabbitMQ.Producer\\RabbitMQ.Producer\\RabbitMQ.Producer.csproj": {}
   },
   "projects": {
-    "D:\\WE DATA\\RabbitMQ\\Full Project\\RabbitMQ.Producer\\RabbitMQ.Producer\\RabbitMQ.Producer.csproj": {
+    "D:\\WE DATA\\RabbitMQ\\Full Project\\mail-sender-microservice\\RabbitMQ.Producer\\RabbitMQ.Producer\\RabbitMQ.Producer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\WE DATA\\RabbitMQ\\Full Project\\RabbitMQ.Producer\\RabbitMQ.Producer\\RabbitMQ.Producer.csproj",
+        "projectUniqueName": "D:\\WE DATA\\RabbitMQ\\Full Project\\mail-sender-microservice\\RabbitMQ.Producer\\RabbitMQ.Producer\\RabbitMQ.Producer.csproj",
         "projectName": "RabbitMQ.Producer",
-        "projectPath": "D:\\WE DATA\\RabbitMQ\\Full Project\\RabbitMQ.Producer\\RabbitMQ.Producer\\RabbitMQ.Producer.csproj",
+        "projectPath": "D:\\WE DATA\\RabbitMQ\\Full Project\\mail-sender-microservice\\RabbitMQ.Producer\\RabbitMQ.Producer\\RabbitMQ.Producer.csproj",
         "packagesPath": "C:\\Users\\karimalaa\\.nuget\\packages\\",
-        "outputPath": "D:\\WE DATA\\RabbitMQ\\Full Project\\RabbitMQ.Producer\\RabbitMQ.Producer\\obj\\",
+        "outputPath": "D:\\WE DATA\\RabbitMQ\\Full Project\\mail-sender-microservice\\RabbitMQ.Producer\\RabbitMQ.Producer\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -3,6 +3,11 @@ Push-Location ./RabbitMQ.Infrastructure
 ./RunRabbitMQCluster.ps1
 Pop-Location 
 
+# Build database
+Push-Location ./RabbitMQ.Database
+./RunRabbitMQDatabase.ps1
+Pop-Location 
+
 # Build consumer
 Push-Location ./RabbitMQ.Consumer
 ./RunRabbitMQConsumer.ps1

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "gMQuqBw0c0qvUvMd5ZCaUH2CRTnX2si7f77wIYFCtyRISupNIX/6dCgT0X6uo0TdhxK6D2vGQWBp5+MwMrTr5A==",
+  "dgSpecHash": "+L6TV6IpMokiRyojpzeSLZPDL38pfL5weY8X0Kyu62d8dgL6Hwmb06Ue1lW11A7k5YyQ8DLu9kFaVlHpQFUSBQ==",
   "success": true,
-  "projectFilePath": "D:\\WE DATA\\RabbitMQ\\Full Project\\RabbitMQ.Producer\\RabbitMQ.Producer\\RabbitMQ.Producer.csproj",
+  "projectFilePath": "D:\\WE DATA\\RabbitMQ\\Full Project\\mail-sender-microservice\\RabbitMQ.Producer\\RabbitMQ.Producer\\RabbitMQ.Producer.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\karimalaa\\.nuget\\packages\\microsoft.extensions.apidescription.server\\3.0.0\\microsoft.extensions.apidescription.server.3.0.0.nupkg.sha512",
     "C:\\Users\\karimalaa\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",

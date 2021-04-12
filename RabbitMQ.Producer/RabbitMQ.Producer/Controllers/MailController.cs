@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using RabbitMQ.Producer.Constants;
 using RabbitMQ.Producer.Dtos;
+using RabbitMQ.Producer.Dtos.Config;
 using RabbitMQ.Producer.Services;
 using System;
 using System.Collections.Generic;
@@ -16,11 +17,13 @@ namespace RabbitMQ.Producer.Controllers
     [Route("api/[controller]")]
     public class MailController : Controller
     {
-        private IQueueService _queueService;
+        private readonly IQueueService _queueService;
+        private readonly AppConfig _config;
 
-        public MailController(IQueueService queueService)
+        public MailController(IQueueService queueService, AppConfig config)
         {
             _queueService = queueService;
+            _config = config;
         }
 
         // POST: MailController/Publish
@@ -33,7 +36,7 @@ namespace RabbitMQ.Producer.Controllers
                 QueueDto queueDto = new()
                 {
                     Body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(emailDto)),
-                    ExchangeName = Config.RabbitExchangeName,
+                    ExchangeName = _config.MassTransit.Exchange,
                     RoutingKey = ExchangeRoutingKeys.MAIL
                 };
                 _queueService.PublishMessage(queueDto);

@@ -1,8 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Consumer.Constants;
+using RabbitMQ.Consumer.Data;
 using RabbitMQ.Consumer.Dtos;
+using RabbitMQ.Consumer.Dtos.Config;
+using RabbitMQ.Consumer.Models;
 using RabbitMQ.Consumer.Services;
 using System;
 using System.Collections.Generic;
@@ -15,21 +19,28 @@ namespace RabbitMQ.Consumer.Listeners
     public class MailListener : IListener
     {
         private readonly IMailService _mailService;
-        public MailListener(IMailService mailService)
+        private readonly AppConfig _config;
+        private readonly IServiceProvider _provider;
+
+        public MailListener(IMailService mailService, AppConfig config, IServiceProvider provider)
         {
             _mailService = mailService;
+            _config = config;
+            _provider = provider;
         }
+
         public void Listen()
         {
             var factory = new ConnectionFactory
             {
-                Uri = new Uri($"amqp://{Config.RabbitUsername}:{Config.RabbitPassword}@{Config.RabbitHostName}:{Config.RabbitPort}")
+                Uri = new Uri($"amqp://{_config.MassTransit.Username}:{_config.MassTransit.Password}@{_config.MassTransit.Host}:{_config.MassTransit.Port}")
             };
            
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
            
-            channel.BasicQos(0, 3, false);
+            // Consume 2 by 2 messages
+            channel.BasicQos(0, 2, false);
 
             var consumer = new EventingBasicConsumer(channel);
 
@@ -45,7 +56,18 @@ namespace RabbitMQ.Consumer.Listeners
                         int deliveryCount = Convert.ToInt32(deliveryCountObj);
                         if (deliveryCount > Config.MaxRetries)
                         {
-                            // TODO: save in database in case you need to requeue
+                            // Save in database in case you need to requeue
+                            string emailRequestMessage = Encoding.UTF8.GetString(e.Body.ToArray());
+                            EmailRequest emailRequest = new();
+                            emailRequest.ParseMessage(emailRequestMessage);
+                            using (var scope = _provider.CreateScope())
+                            {
+                                var _context = scope.ServiceProvider.GetService<DataContext>();
+                                _context.EmailRequests.Add(emailRequest);
+                                await _context.SaveChangesAsync();
+
+                                Console.WriteLine("message is stuck, notification send to database");
+                            }
 
                             // send notification email, or replace with a log
                             await _mailService.LogStuckMail(Encoding.UTF8.GetString(e.Body.ToArray()));
@@ -53,9 +75,9 @@ namespace RabbitMQ.Consumer.Listeners
                             // remove from queue
                             channel.BasicReject(e.DeliveryTag, false);
 
-                            Console.WriteLine("message is stuck, removed from queue");
+                            
 
-                            throw new Exception(message: "logical error occurred!");
+                            throw new Exception(message: "message is stuck, removed from queue");
                         }
                     }
                     #endregion
@@ -81,11 +103,9 @@ namespace RabbitMQ.Consumer.Listeners
                     Console.WriteLine($"error: {ex.Message} /n");
                    
                 }
-
-                
             };
 
-            channel.BasicConsume(Config.RabbitQueueName, false, consumer);
+            channel.BasicConsume(_config.MassTransit.Queue, false, consumer);
             Console.ReadLine();
         }
     }

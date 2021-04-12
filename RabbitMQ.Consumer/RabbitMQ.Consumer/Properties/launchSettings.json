@@ -4,7 +4,11 @@
       "commandName": "Project"
     },
     "Docker": {
-      "commandName": "Docker"
+      "commandName": "Docker",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "DockerfileRunArguments": "--net rabbits"
     }
   }
 }

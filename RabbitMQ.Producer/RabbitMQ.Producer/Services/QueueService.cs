@@ -2,6 +2,7 @@
 using RabbitMQ.Client;
 using RabbitMQ.Producer.Constants;
 using RabbitMQ.Producer.Dtos;
+using RabbitMQ.Producer.Dtos.Config;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,11 +18,18 @@ namespace RabbitMQ.Producer.Services
 
     public class QueueService : IQueueService
     {
+
+        private readonly AppConfig _config;
+        public QueueService(AppConfig config)
+        {
+            _config = config;
+        }
+
         public void PublishMessage(QueueDto queueDto)
         {
             var factory = new ConnectionFactory
             {
-                Uri = new Uri($"amqp://{Config.RabbitUsername}:{Config.RabbitPassword}@{Config.RabbitHostName}:{Config.RabbitPort}")
+                Uri = new Uri($"amqp://{_config.MassTransit.Username}:{_config.MassTransit.Password}@{_config.MassTransit.Host}:{_config.MassTransit.Port}")
             };
             // TODO: check if you need to keep connection and channel created only one time?
             using var connection = factory.CreateConnection();
