@@ -23,15 +23,15 @@ Simple, high available microservices with RabbitMQ responsible for sending huge 
 - Open powershell terminal in the root folder
 - On Windows OS, run:
 ```powershell
-        Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 - To start all services:
 ```powershell
-        ./Start.ps1
+./Start.ps1
 ```
 - To stop all services:
 ```powershell
-        ./Stop.ps1
+./Stop.ps1
 ```
 
 # Components
