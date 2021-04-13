@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using RabbitMQ.Client;
-using RabbitMQ.Producer.Constants;
 using RabbitMQ.Producer.Dtos;
 using RabbitMQ.Producer.Dtos.Config;
 using System;
@@ -35,8 +34,8 @@ namespace RabbitMQ.Producer.Services
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
 
-            // use name of queue if you don't have exchanges and bindings by routing key yet!
-            //cause we use the default exchange which uses queue name instead of routing key
+            // use name of queue if you don't have exchanges and bindings by routing key!
+            // cause we use the default exchange which uses queue name instead of routing key
             channel.BasicPublish(queueDto.ExchangeName, queueDto.RoutingKey, null, queueDto.Body);
         }
     }

@@ -26,7 +26,7 @@ namespace RabbitMQ.Producer.Controllers
             _config = config;
         }
 
-        // POST: MailController/Publish
+        // POST: Mail/Publish
         [HttpPost]
         [Route("Publish")]
         public ActionResult Create([FromBody] EmailDto emailDto)

@@ -2,7 +2,6 @@
 using MailKit.Security;
 using MimeKit;
 using MimeKit.Text;
-using RabbitMQ.Consumer.Constants;
 using RabbitMQ.Consumer.Dtos;
 using RabbitMQ.Consumer.Dtos.Config;
 using System;
@@ -22,8 +21,6 @@ namespace RabbitMQ.Consumer.Services
 
     public class MailService : IMailService
     {
-        public SmtpClient TEClient;
-
         private readonly AppConfig _config;
         public MailService(AppConfig config)
         {
@@ -45,6 +42,7 @@ namespace RabbitMQ.Consumer.Services
                 return false;
 
             // ignore from email right now!
+            // TODO: may we need to handle the from email later
             message.From.Add(MailboxAddress.Parse(_config.Smtp.Username));
 
             foreach(string to in emailDto.To) 
@@ -61,6 +59,7 @@ namespace RabbitMQ.Consumer.Services
                 foreach (string bcc in emailDto.BCC)
                     message.Bcc.Add(MailboxAddress.Parse(bcc));
             }
+
             // SMTP Setup
             using var client = new SmtpClient();
             client.ServerCertificateValidationCallback = (s, c, h, e) => true;
@@ -72,8 +71,6 @@ namespace RabbitMQ.Consumer.Services
             return true;
         }
    
-
-
         public async Task LogStuckMail(string messageBody)
         {
             var message = new MimeMessage
@@ -86,7 +83,6 @@ namespace RabbitMQ.Consumer.Services
             };
 
             message.From.Add(MailboxAddress.Parse(_config.Smtp.Username));
-
             message.To.Add(MailboxAddress.Parse(_config.Smtp.Username));
 
             // SMTP Setup

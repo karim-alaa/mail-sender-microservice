@@ -48,7 +48,6 @@ namespace RabbitMQ.Consumer.Listeners
             {
                 try
                 {
-                    
                     #region check retries
                     if (e.BasicProperties.Headers != null)
                     {
@@ -75,8 +74,6 @@ namespace RabbitMQ.Consumer.Listeners
                             // remove from queue
                             channel.BasicReject(e.DeliveryTag, false);
 
-                            
-
                             throw new Exception(message: "message is stuck, removed from queue");
                         }
                     }
@@ -101,7 +98,6 @@ namespace RabbitMQ.Consumer.Listeners
                 catch (Exception ex)
                 {
                     Console.WriteLine($"error: {ex.Message} /n");
-                   
                 }
             };
 
