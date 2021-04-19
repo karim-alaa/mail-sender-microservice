@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "RabbitMQ.Consumer": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "DockerfileRunArguments": "--net rabbits"
+    }
+  }
+}

@@ -1,3 +1,5 @@
+# Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
 # Build rabbitMQ cluster 
 Push-Location ./RabbitMQ.Infrastructure
 ./RunRabbitMQCluster.ps1

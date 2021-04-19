@@ -10,6 +10,7 @@ namespace RabbitMQ.Consumer.Dtos.Config
     {
         public SmtpOptions Smtp { get; set; }
         public MassTransitOptions MassTransit { get; set; }
+        public int MaxMessageRetries { get; set; }
         public string ConnectionString { get; set; }
     }
 }

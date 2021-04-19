@@ -10,13 +10,13 @@ Simple, high available microservices with RabbitMQ responsible for sending huge 
 * RabbitMQ, RabbitMQ Clustering
 * SQL Server Database
 * Docker
-* Json 
 
 # Prerequisites
  - Visual studio 2019, or Visual studio code
  - SQL Server 2019
  - .Net Core 5.0
  - Docker
+ - Powershell
  - Postman
 
 # Instllation
@@ -38,22 +38,22 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 | Component  | Technology      | Deployment Approach
 |------------|-----------------|---------------------|
 | RabbitMQ | run as a cluster in three nodes (rabbit-1, rabbit-2, rabbit-3) | run as a containers
-|Consumer |.Net Core 5.0|run as a container|
-|Producer  |.Net Core 5.0|run as a container|
+|Consumer |.Net Core 5.0 - Console App|run as a container|
+|Producer  |.Net Core 5.0 - Web API App|run as a container|
 |Database |SQL Server|run as a container|
          
 
 # Good to know
-  - Basically rabbit-1 node is the master and the other two nodes are a mirrors, if rabbit-1 die another node will be the master, and if it back again it will be a mirror
-  - Each node has 2 queues and 1 exchange with different routing keys to handle mails and requests, for now the consumers only consume mails
-  - You can run multiple consumers instances
-  - Producer run as a web API with swagger documentation in http://localhost:7070/swagger/index.html
+  - Basically rabbit-1 node is the master and the other two nodes are a mirrors, if rabbit-1 die another node will be the master, and if it back again it will be a mirror.
+  - Each node has 2 queues and 1 exchange with different routing keys to handle mails and requests, for now the consumers only consume mails.
+  - You can run multiple consumers instances.
+  - Producer run as a web API with swagger documentation in http://localhost:7070/swagger/index.html.
+  - Currently, Nginx Load Balancer is not implemented yet, so we only use rabbit-1 node.
 
-# Features!
-  - Send Mail
-  - Retry Sending mail
-  - Notify with stuck mails
-  - High availability Queue with RabbitMQ Clusters (Quorum  Queues)
-  - Easy Deployment & Import customized definitions
-
-
+# Features! 
+  :heavy_check_mark: Send Mail<br/>
+  :heavy_check_mark: Retry Sending mail<br/>
+  :heavy_check_mark: Notify with stuck mails<br/>
+  :heavy_check_mark: High availability Queue with RabbitMQ Clusters (Quorum  Queues)<br/>
+  :heavy_check_mark: Easy Deployment & Import customized definitions<br/>
+  :x: Nginx Load Balancer

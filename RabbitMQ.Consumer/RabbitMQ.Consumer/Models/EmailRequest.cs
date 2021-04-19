@@ -25,16 +25,15 @@ namespace RabbitMQ.Consumer.Models
         public DateTime CtreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
-        public void ParseMessage(string emailRequestMessage)
+        public void ParseMessage(EmailRequestDto emailRequestDto)
         {
-            EmailDto emailRequestDto = JsonConvert.DeserializeObject<EmailDto>(emailRequestMessage);
-
             Subject = emailRequestDto.Subject;
             Body = emailRequestDto.Body;
-            ToEmails = string.Join(",", emailRequestDto.To);
 
             if(emailRequestDto.From != null)
                 FromEmail = emailRequestDto.From;
+
+            ToEmails = string.Join(",", emailRequestDto.To);
 
             if (emailRequestDto.CC != null)
                 CC = string.Join(",", emailRequestDto.CC);

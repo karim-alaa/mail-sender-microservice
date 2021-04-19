@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -9,10 +10,7 @@ using RabbitMQ.Consumer.Dtos.Config;
 using RabbitMQ.Consumer.Models;
 using RabbitMQ.Consumer.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace RabbitMQ.Consumer.Listeners
 {
@@ -53,47 +51,86 @@ namespace RabbitMQ.Consumer.Listeners
                     {
                         e.BasicProperties.Headers.TryGetValue("x-delivery-count", out object deliveryCountObj);
                         int deliveryCount = Convert.ToInt32(deliveryCountObj);
-                        if (deliveryCount > Config.MaxRetries)
+                        if (deliveryCount > _config.MaxMessageRetries)
                         {
                             // Save in database in case you need to requeue
                             string emailRequestMessage = Encoding.UTF8.GetString(e.Body.ToArray());
-                            EmailRequest emailRequest = new();
-                            emailRequest.ParseMessage(emailRequestMessage);
+                            Message messageRequest = JsonConvert.DeserializeObject<Message>(emailRequestMessage);
+
                             using (var scope = _provider.CreateScope())
                             {
                                 var _context = scope.ServiceProvider.GetService<DataContext>();
-                                _context.EmailRequests.Add(emailRequest);
-                                await _context.SaveChangesAsync();
+                                try
+                                {
+                                    // add the stuck email request
+                                    messageRequest.Status = MessageStatuses.ERROR;
+                                    messageRequest.UpdatedAt = DateTime.Now;
+                                    _context.Messages.Update(messageRequest);
+                                    await _context.SaveChangesAsync();
 
-                                Console.WriteLine("message is stuck, notification send to database");
+                                    Console.WriteLine("message is stuck, notification send to database");
+                                }
+                                catch (Exception ex)
+                                {
+                                    // Record may be delete
+                                    _context.Entry(messageRequest).State = EntityState.Detached;
+                                    // log this email message
+                                    EmailRequestDto StuckEmailRequestDto = JsonConvert.DeserializeObject<EmailRequestDto>(messageRequest.Body);
+
+                                    EmailRequest emailRequest = new();
+                                    emailRequest.ParseMessage(StuckEmailRequestDto);
+                                    await _context.StuckEmailRequests.AddAsync(emailRequest);
+                                    await _context.SaveChangesAsync();
+                                    Console.WriteLine("message logged");
+                                }
                             }
-
-                            // send notification email, or replace with a log
-                            await _mailService.LogStuckMail(Encoding.UTF8.GetString(e.Body.ToArray()));
+                        // send notification email, or replace with a log
+                        //await _mailService.LogStuckMail(Encoding.UTF8.GetString(e.Body.ToArray()));
                             
-                            // remove from queue
-                            channel.BasicReject(e.DeliveryTag, false);
+                        // remove from queue
+                        channel.BasicReject(e.DeliveryTag, false);
 
-                            throw new Exception(message: "message is stuck, removed from queue");
+                        throw new Exception(message: "message is stuck, removed from queue");
                         }
                     }
                     #endregion
                     
                     string message = Encoding.UTF8.GetString(e.Body.ToArray());
-                    EmailDto emailDto = JsonConvert.DeserializeObject<EmailDto>(message);
-                    Console.WriteLine(message);
+                    Message messageRequestDone = JsonConvert.DeserializeObject<Message>(message);
+                    EmailRequestDto emailRequestDto = JsonConvert.DeserializeObject<EmailRequestDto>(messageRequestDone.Body);
 
-                    bool messageSent = await _mailService.SendMail(emailDto);
-                    if (messageSent)
+                    Console.WriteLine(messageRequestDone.Body);
+
+                    using (var scope = _provider.CreateScope())
                     {
-                        channel.BasicAck(e.DeliveryTag, false);
-                        Console.WriteLine("Mail Sent!");
+                        var _context = scope.ServiceProvider.GetService<DataContext>();
+                        try
+                        {
+                            bool messageSent = await _mailService.SendMail(emailRequestDto);
+                            if (messageSent)
+                            {
+                                Console.WriteLine("Mail Sent!");
+
+                                channel.BasicAck(e.DeliveryTag, false);
+                                messageRequestDone.Status = MessageStatuses.PROCEED;
+                                messageRequestDone.UpdatedAt = DateTime.Now;
+                                _context.Messages.Update(messageRequestDone);
+                                await _context.SaveChangesAsync();
+                                Console.WriteLine("message status updated to proceed");
+                            }
+                            else
+                            {
+                                // requeue
+                                channel.BasicNack(e.DeliveryTag, false, true);
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            // Record may be delete, or exchange server down
+                        }
                     }
-                    else
-                    {
-                        // requeue
-                        channel.BasicNack(e.DeliveryTag, false, true);
-                    }
+
+                   
                 }
                 catch (Exception ex)
                 {

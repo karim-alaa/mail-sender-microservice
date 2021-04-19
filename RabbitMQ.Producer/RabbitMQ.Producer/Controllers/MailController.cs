@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using RabbitMQ.Producer.Constants;
 using RabbitMQ.Producer.Dtos;
 using RabbitMQ.Producer.Dtos.Config;
+using RabbitMQ.Producer.Models;
 using RabbitMQ.Producer.Services;
 using System;
 using System.Collections.Generic;
@@ -29,20 +30,22 @@ namespace RabbitMQ.Producer.Controllers
         // POST: Mail/Publish
         [HttpPost]
         [Route("Publish")]
-        public ActionResult Create([FromBody] EmailDto emailDto)
+        public async Task<ActionResult> Create([FromBody] MessageDto messageDto)
         {
             try
             {
-                QueueDto queueDto = new()
+                Message message = new()
                 {
-                    Body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(emailDto)),
+                    Id = messageDto.Id,
+                    Body = JsonConvert.SerializeObject(messageDto.EmailData).ToString(),
                     ExchangeName = _config.MassTransit.Exchange,
                     RoutingKey = ExchangeRoutingKeys.MAIL
                 };
-                _queueService.PublishMessage(queueDto);
-                return Ok("message sent");
+                if(await _queueService.ScheduleMessage(message))
+                    return Ok("message sent");
+                return Ok("message sent before, we take care about it.");
             }
-            catch
+            catch(Exception ex)
             {
                 return BadRequest("Something went wrong");
             }

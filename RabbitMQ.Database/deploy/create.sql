@@ -8,7 +8,8 @@ USE [retry_service]
 GO
 
 
-CREATE TABLE EmailRequests (
+
+CREATE TABLE StuckEmailRequests (
     Id varchar(100),
     Subject varchar(max),
     Body text,
@@ -17,6 +18,17 @@ CREATE TABLE EmailRequests (
     CC varchar(max),
     BCC varchar(max),
     CtreatedAt datetime,
+    UpdatedAt datetime
+);
+GO
+
+CREATE TABLE Messages (
+    Id varchar(100) primary key,
+    ExchangeName varchar(100),
+    RoutingKey varchar(100),
+    Body Text,
+    Status varchar(50),
+    CreatedAt datetime,
     UpdatedAt datetime
 );
 GO

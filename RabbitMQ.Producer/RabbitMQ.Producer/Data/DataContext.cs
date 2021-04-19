@@ -1,23 +1,21 @@
-﻿using Microsoft.EntityFrameworkCore;
-using RabbitMQ.Consumer.Dtos.Config;
-using RabbitMQ.Consumer.Models;
+
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using RabbitMQ.Producer.Models;
 
-namespace RabbitMQ.Consumer.Data
+namespace RabbitMQ.Producer.Data
 {
     public class DataContext : DbContext
     {
+        // DbSet properties declarations...
+
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
         }
 
         public DbSet<Message> Messages { get; set; }
-
-        public DbSet<EmailRequest> StuckEmailRequests { get; set; }
-
     }
 }

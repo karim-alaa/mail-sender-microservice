@@ -15,7 +15,7 @@ namespace RabbitMQ.Consumer.Services
 
     public interface IMailService
     {
-        Task<bool> SendMail(EmailDto emailDto);
+        Task<bool> SendMail(EmailRequestDto emailDto);
         Task LogStuckMail(string messageBody);
     }
 
@@ -27,7 +27,7 @@ namespace RabbitMQ.Consumer.Services
             _config = config;
         }
 
-        public async Task<bool> SendMail(EmailDto emailDto)
+        public async Task<bool> SendMail(EmailRequestDto emailDto)
         {
             var message = new MimeMessage
             {

@@ -32,7 +32,7 @@ namespace RabbitMQ.Consumer
                 .AddSingleton<IMailService, MailService>()
                 .AddSingleton<IListener, MailListener>()
                 .AddSingleton(_config)
-                .AddDbContext<DataContext>(options => options.UseSqlServer(_config.ConnectionString), ServiceLifetime.Transient)
+                .AddDbContext<DataContext>(options => options.UseSqlServer(_config.ConnectionString))
                 .BuildServiceProvider();
 
             // Activate Mail Listener
