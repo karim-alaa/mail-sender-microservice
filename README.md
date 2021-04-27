@@ -57,7 +57,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
   :heavy_check_mark: Retry Deliver mail to quque<br/>
   :heavy_check_mark: Retry Sending mail<br/>
   :heavy_check_mark: Log stuck mails<br/>
-  :heavy_check_mark: Custom Logging<br/>
+  :heavy_check_mark: Custom Logging using global middleware to log any http request.<br/>
   :heavy_check_mark: High availability Queue with RabbitMQ Clusters (Quorum  Queues)<br/>
   :heavy_check_mark: Easy Deployment & Import customized definitions<br/>
   :x: Nginx Load Balancer
