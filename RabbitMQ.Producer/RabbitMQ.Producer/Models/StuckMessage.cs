@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace RabbitMQ.Producer.Models
 {
-    public class Message
+    public class StuckMessage
     {
-        public Message()
+        public StuckMessage()
         {
             CreatedAt = DateTime.Now;
             ReDeliveryTimes = 0;

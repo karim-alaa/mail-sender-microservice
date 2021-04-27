@@ -17,5 +17,6 @@ namespace RabbitMQ.Producer.Data
         }
 
         public DbSet<Message> Messages { get; set; }
+        public DbSet<StuckMessage> StuckMessages { get; set; }
     }
 }

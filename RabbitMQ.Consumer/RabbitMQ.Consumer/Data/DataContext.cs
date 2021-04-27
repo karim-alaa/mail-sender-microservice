@@ -16,8 +16,5 @@ namespace RabbitMQ.Consumer.Data
         }
 
         public DbSet<Message> Messages { get; set; }
-
-        public DbSet<EmailRequest> StuckEmailRequests { get; set; }
-
     }
 }

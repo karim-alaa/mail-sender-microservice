@@ -7,26 +7,24 @@ GO
 USE [retry_service]
 GO
 
-
-
-CREATE TABLE StuckEmailRequests (
-    Id varchar(100),
-    Subject varchar(max),
-    Body text,
-    FromEmail varchar(max),
-    ToEmails varchar(max),
-    CC varchar(max),
-    BCC varchar(max),
-    CtreatedAt datetime,
+CREATE TABLE Messages (
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
+    ExchangeName varchar(100),
+    RoutingKey varchar(100),
+    Body Text,
+    ReDeliveryTimes int,
+    Status varchar(50),
+    CreatedAt datetime,
     UpdatedAt datetime
 );
 GO
 
-CREATE TABLE Messages (
-    Id varchar(100) primary key,
+CREATE TABLE StuckMessages (
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
     ExchangeName varchar(100),
     RoutingKey varchar(100),
     Body Text,
+    ReDeliveryTimes int,
     Status varchar(50),
     CreatedAt datetime,
     UpdatedAt datetime

@@ -42,12 +42,12 @@ namespace RabbitMQ.Producer.Controllers
                     RoutingKey = ExchangeRoutingKeys.MAIL
                 };
                 if(await _queueService.ScheduleMessage(message))
-                    return Ok("message sent");
-                return Ok("message sent before, we take care about it.");
+                    return Ok(Messages.MESSAGE_SENT);
+                return BadRequest(Messages.MESSAGE_ALREADY_SENT);
             }
-            catch(Exception ex)
+            catch(Exception)
             {
-                return BadRequest("Something went wrong");
+                return BadRequest(Messages.SOME_THING_WENT_WRONG);
             }
         }
     }

@@ -13,8 +13,8 @@ namespace RabbitMQ.Producer.Utilities
         public AutoMapperProfile()
         {
             // Message
-            //CreateMap<Message, MessagePublishDto>();
-            //CreateMap<MessagePublishDto, Message>();
+            CreateMap<Message, StuckMessage>();
+            CreateMap<StuckMessage, Message>();
         }
      }
 }

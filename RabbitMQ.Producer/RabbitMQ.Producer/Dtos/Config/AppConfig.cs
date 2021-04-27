@@ -9,6 +9,8 @@ namespace RabbitMQ.Producer.Dtos.Config
     {
         public SmtpOptions Smtp { get; set; }
         public MassTransitOptions MassTransit { get; set; }
+        public ReDeliveryOptions ReDelivery { get; set; }
+        public CustomLoggingOptions CustomLogging { get; set; }
         public string ConnectionString { get; set; }
     }
 }

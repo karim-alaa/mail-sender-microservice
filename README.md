@@ -38,9 +38,9 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 | Component  | Technology      | Deployment Approach
 |------------|-----------------|---------------------|
 | RabbitMQ | run as a cluster in three nodes (rabbit-1, rabbit-2, rabbit-3) | run as a containers
-|Consumer |.Net Core 5.0 - Console App|run as a container|
-|Producer  |.Net Core 5.0 - Web API App|run as a container|
-|Database |SQL Server|run as a container|
+| Consumer |.Net Core 5.0 - Console App|run as a container|
+| Producer  |.Net Core 5.0 - Web API App|run as a container|
+| Database |SQL Server|run as a container|
          
 
 # Good to know
@@ -49,11 +49,15 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
   - You can run multiple consumers instances.
   - Producer run as a web API with swagger documentation in http://localhost:7070/swagger/index.html.
   - Currently, Nginx Load Balancer is not implemented yet, so we only use rabbit-1 node.
+  - Producer will receive a message with an unique ID 'GUID', and will try to push the message to the queue if the ID is new with initial status 'INQUEUE', consumer should receive the message and change its status to 'PROCEED' or 'ERROR', then a cron job will be run every 20 min to check if there are stuck message with status 'INQUEUE' or 'ERROR' and it will try to re-deliver it again for 2 times, if it is still stuck, the message will be logged in 'StuckMessages' table in the database
+  - All configs are in 'appsettings.json' file.
 
 # Features! 
   :heavy_check_mark: Send Mail<br/>
+  :heavy_check_mark: Retry Deliver mail to quque<br/>
   :heavy_check_mark: Retry Sending mail<br/>
-  :heavy_check_mark: Notify with stuck mails<br/>
+  :heavy_check_mark: Log stuck mails<br/>
+  :heavy_check_mark: Custom Logging<br/>
   :heavy_check_mark: High availability Queue with RabbitMQ Clusters (Quorum  Queues)<br/>
   :heavy_check_mark: Easy Deployment & Import customized definitions<br/>
   :x: Nginx Load Balancer

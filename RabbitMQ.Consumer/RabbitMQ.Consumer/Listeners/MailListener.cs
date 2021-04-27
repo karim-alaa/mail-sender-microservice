@@ -70,10 +70,16 @@ namespace RabbitMQ.Consumer.Listeners
 
                                     Console.WriteLine("message is stuck, notification send to database");
                                 }
-                                catch (Exception ex)
+                                catch (Exception)
                                 {
                                     // Record may be delete
                                     _context.Entry(messageRequest).State = EntityState.Detached;
+
+                                    await _context.Messages.AddAsync(messageRequest);
+                                    await _context.SaveChangesAsync();
+
+                                    Console.WriteLine("record removed from database, a new record created");
+                                    /*
                                     // log this email message
                                     EmailRequestDto StuckEmailRequestDto = JsonConvert.DeserializeObject<EmailRequestDto>(messageRequest.Body);
 
@@ -82,6 +88,7 @@ namespace RabbitMQ.Consumer.Listeners
                                     await _context.StuckEmailRequests.AddAsync(emailRequest);
                                     await _context.SaveChangesAsync();
                                     Console.WriteLine("message logged");
+                                    */
                                 }
                             }
                         // send notification email, or replace with a log

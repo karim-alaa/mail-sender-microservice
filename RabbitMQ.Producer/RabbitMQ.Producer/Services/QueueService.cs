@@ -16,6 +16,7 @@ namespace RabbitMQ.Producer.Services
     public interface IQueueService
     {
         Task<bool> ScheduleMessage(Message message);
+        Task<bool> ReScheduleMessage(Message message);
     }
 
     public class QueueService : IQueueService
@@ -23,13 +24,11 @@ namespace RabbitMQ.Producer.Services
 
         private readonly AppConfig _config;
         private readonly Data.DataContext _context;
-        private readonly IMapper _mapper;
          
-        public QueueService(AppConfig config, Data.DataContext context, IMapper mapper)
+        public QueueService(AppConfig config, Data.DataContext context)
         {
             _config = config;
             _context = context;
-            _mapper = mapper;
         }
 
         public async Task<bool> ScheduleMessage(Message message)
@@ -37,7 +36,6 @@ namespace RabbitMQ.Producer.Services
             try
             {
                 message.Status = MessageStatuses.INQUEUE;
-                message.CreatedAt = DateTime.Now;
                 message.UpdatedAt = DateTime.Now;
 
                 await _context.Messages.AddAsync(message);
@@ -48,6 +46,28 @@ namespace RabbitMQ.Producer.Services
                 return true;
             }
             catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlException && (sqlException.Number == 2627 || sqlException.Number == 2601))
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> ReScheduleMessage(Message message)
+        {
+            message.Status = MessageStatuses.INQUEUE;
+            message.UpdatedAt = DateTime.Now;
+            message.ReDeliveryTimes++;
+
+            try
+            {
+                // publish the message
+                PublishMessage(message);
+
+                _context.Messages.Update(message);
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception)
             {
                 return false;
             }

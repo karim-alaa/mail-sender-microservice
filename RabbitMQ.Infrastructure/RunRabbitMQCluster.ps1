@@ -19,6 +19,7 @@ docker run -d --rm --net rabbits `
 -v ${PWD}/config/:/config/ `
 -e RABBITMQ_CONFIG_FILE=/config/custom-config `
 -e RABBITMQ_ERLANG_COOKIE=EPAYMENTRETRYSERVICECOOKIE `
+-e TZ=Africa/Cairo `
 --hostname rabbit-1 `
 --name rabbit-1 `
 -p 8081:15672 `
@@ -31,6 +32,7 @@ docker run -d --rm --net rabbits `
 -v ${PWD}/config/:/config/ `
 -e RABBITMQ_CONFIG_FILE=/config/custom-config `
 -e RABBITMQ_ERLANG_COOKIE=EPAYMENTRETRYSERVICECOOKIE `
+-e TZ=Africa/Cairo `
 --hostname rabbit-2 `
 --name rabbit-2 `
 -p 8082:15672 `
@@ -43,6 +45,7 @@ docker run -d --rm --net rabbits `
 -v ${PWD}/config/:/config/ `
 -e RABBITMQ_CONFIG_FILE=/config/custom-config `
 -e RABBITMQ_ERLANG_COOKIE=EPAYMENTRETRYSERVICECOOKIE `
+-e TZ=Africa/Cairo `
 --hostname rabbit-3 `
 --name rabbit-3 `
 -p 8083:15672 `
