@@ -50,6 +50,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
   - Producer run as a web API with swagger documentation in http://localhost:7070/swagger/index.html.
   - Currently, Nginx Load Balancer is not implemented yet, so we only use rabbit-1 node.
   - Producer will receive a message with an unique ID 'GUID', and will try to push the message to the queue if the ID is new with initial status 'INQUEUE', consumer should receive the message and change its status to 'PROCEED' or 'ERROR', then a cron job will be run every 20 min to check if there are stuck message with status 'INQUEUE' or 'ERROR' and it will try to re-deliver it again for 2 times, if it is still stuck, the message will be logged in 'StuckMessages' table in the database
+  - There is a SQL Job that run every 2 weeks to delete data in messages and logs tables which are exceeded 2 weeks
   - All configs are in 'appsettings.json' file.
 
 # Features! 

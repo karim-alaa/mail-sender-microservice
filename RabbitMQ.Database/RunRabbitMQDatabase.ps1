@@ -7,8 +7,10 @@ docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=P@ssW0rdC00MP!!EX" `
    -h database `
    --net rabbits `
    -e TZ=Africa/Cairo `
+   -e MSSQL_AGENT_ENABLED=True `
    -p 2020:1433 `
    -v ./deploy/Create.sql `
+   -v ./deploy/ScheduledJob.sql `
    -d mcr.microsoft.com/mssql/server:2019-latest
 
 Write-Output "Wait till the sql server being up and running..."
@@ -25,7 +27,9 @@ docker exec -it database /opt/mssql-tools/bin/sqlcmd `
 Write-Output "SA Password Changed"
 
 docker cp ./deploy/create.sql database:/tmp/
+docker cp ./deploy/scheduledJob.sql database:/tmp/
 
 docker exec -it database /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "W0rd@Pass#WE1" -i ./tmp/create.sql
+docker exec -it database /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "W0rd@Pass#WE1" -i ./tmp/scheduledJob.sql
 
 Write-Output "Database imported!"
