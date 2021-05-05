@@ -31,30 +31,32 @@ namespace RabbitMQ.Consumer.Listeners
         {
             var factory = new ConnectionFactory
             {
-                Uri = new Uri($"amqp://{_config.MassTransit.Username}:{_config.MassTransit.Password}@{_config.MassTransit.Host}:{_config.MassTransit.Port}")
+                Uri = new Uri($"amqp://{_config.MassTransit.Username}:{_config.MassTransit.Password}@{_config.MassTransit.Host}:{_config.MassTransit.Port}"),
+                AutomaticRecoveryEnabled = true,
+                NetworkRecoveryInterval = TimeSpan.FromSeconds(_config.MassTransit.NetworkRecoveryIntervalSeconds)
             };
-           
-            using var connection = factory.CreateConnection();
-            using var channel = connection.CreateModel();
+
+            using IConnection connection = factory.CreateConnection();
+            using IModel channel = connection.CreateModel();
            
             // Consume 2 by 2 messages
             channel.BasicQos(0, 2, false);
 
-            var consumer = new EventingBasicConsumer(channel);
+            EventingBasicConsumer consumer = new(channel);
 
-            consumer.Received += async (sender, e) =>
+            consumer.Received += async (sender, ea) =>
             {
                 try
                 {
                     #region check retries
-                    if (e.BasicProperties.Headers != null)
+                    if (ea.BasicProperties.Headers != null)
                     {
-                        e.BasicProperties.Headers.TryGetValue("x-delivery-count", out object deliveryCountObj);
+                        ea.BasicProperties.Headers.TryGetValue("x-delivery-count", out object deliveryCountObj);
                         int deliveryCount = Convert.ToInt32(deliveryCountObj);
                         if (deliveryCount > _config.MaxMessageRetries)
                         {
                             // Save in database in case you need to requeue
-                            string emailRequestMessage = Encoding.UTF8.GetString(e.Body.ToArray());
+                            string emailRequestMessage = Encoding.UTF8.GetString(ea.Body.ToArray());
                             Message messageRequest = JsonConvert.DeserializeObject<Message>(emailRequestMessage);
 
                             using (var scope = _provider.CreateScope())
@@ -79,30 +81,18 @@ namespace RabbitMQ.Consumer.Listeners
                                     await _context.SaveChangesAsync();
 
                                     Console.WriteLine("record removed from database, a new record created");
-                                    /*
-                                    // log this email message
-                                    EmailRequestDto StuckEmailRequestDto = JsonConvert.DeserializeObject<EmailRequestDto>(messageRequest.Body);
-
-                                    EmailRequest emailRequest = new();
-                                    emailRequest.ParseMessage(StuckEmailRequestDto);
-                                    await _context.StuckEmailRequests.AddAsync(emailRequest);
-                                    await _context.SaveChangesAsync();
-                                    Console.WriteLine("message logged");
-                                    */
                                 }
                             }
-                        // send notification email, or replace with a log
-                        //await _mailService.LogStuckMail(Encoding.UTF8.GetString(e.Body.ToArray()));
                             
                         // remove from queue
-                        channel.BasicReject(e.DeliveryTag, false);
+                        channel.BasicReject(ea.DeliveryTag, false);
 
                         throw new Exception(message: "message is stuck, removed from queue");
                         }
                     }
                     #endregion
                     
-                    string message = Encoding.UTF8.GetString(e.Body.ToArray());
+                    string message = Encoding.UTF8.GetString(ea.Body.ToArray());
                     Message messageRequestDone = JsonConvert.DeserializeObject<Message>(message);
                     EmailRequestDto emailRequestDto = JsonConvert.DeserializeObject<EmailRequestDto>(messageRequestDone.Body);
 
@@ -118,7 +108,7 @@ namespace RabbitMQ.Consumer.Listeners
                             {
                                 Console.WriteLine("Mail Sent!");
 
-                                channel.BasicAck(e.DeliveryTag, false);
+                                channel.BasicAck(ea.DeliveryTag, false);
                                 messageRequestDone.Status = MessageStatuses.PROCEED;
                                 messageRequestDone.UpdatedAt = DateTime.Now;
                                 _context.Messages.Update(messageRequestDone);
@@ -128,7 +118,7 @@ namespace RabbitMQ.Consumer.Listeners
                             else
                             {
                                 // requeue
-                                channel.BasicNack(e.DeliveryTag, false, true);
+                                channel.BasicNack(ea.DeliveryTag, false, true);
                             }
                         }
                         catch (Exception)
@@ -146,6 +136,7 @@ namespace RabbitMQ.Consumer.Listeners
             };
 
             channel.BasicConsume(_config.MassTransit.Queue, false, consumer);
+
             Console.ReadLine();
         }
     }

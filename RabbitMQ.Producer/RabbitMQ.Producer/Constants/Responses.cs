@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace RabbitMQ.Producer.Constants
 {
-    public static class Messages
+    public static class Responses
     {
         public const string MESSAGE_SENT = "MESSAGE_SENT";
         public const string MESSAGE_ALREADY_SENT = "MESSAGE_ALREADY_SENT";

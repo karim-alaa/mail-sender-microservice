@@ -19,7 +19,6 @@ namespace RabbitMQ.Producer.Dtos.Config
         public CustomLoggingDBArgs Args { get; set; }
     }
 
-
     public class CustomLoggingDBArgs
     {
         public string ConnectionString { get; set; }

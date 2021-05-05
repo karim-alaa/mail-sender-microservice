@@ -11,6 +11,6 @@ namespace RabbitMQ.Producer.Dtos.Config
         public MassTransitOptions MassTransit { get; set; }
         public ReDeliveryOptions ReDelivery { get; set; }
         public CustomLoggingOptions CustomLogging { get; set; }
-        public string ConnectionString { get; set; }
+        public DBOptions DBConfig { get; set; }
     }
 }

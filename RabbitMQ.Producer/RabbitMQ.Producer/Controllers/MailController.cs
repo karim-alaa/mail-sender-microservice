@@ -6,6 +6,7 @@ using RabbitMQ.Producer.Dtos;
 using RabbitMQ.Producer.Dtos.Config;
 using RabbitMQ.Producer.Models;
 using RabbitMQ.Producer.Services;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,7 @@ namespace RabbitMQ.Producer.Controllers
     {
         private readonly IQueueService _queueService;
         private readonly AppConfig _config;
+        private readonly ILogger _logger = Log.ForContext<QueueService>();
 
         public MailController(IQueueService queueService, AppConfig config)
         {
@@ -42,12 +44,13 @@ namespace RabbitMQ.Producer.Controllers
                     RoutingKey = ExchangeRoutingKeys.MAIL
                 };
                 if(await _queueService.ScheduleMessage(message))
-                    return Ok(Messages.MESSAGE_SENT);
-                return BadRequest(Messages.MESSAGE_ALREADY_SENT);
+                    return Ok(Responses.MESSAGE_SENT);
+                return BadRequest(Responses.MESSAGE_ALREADY_SENT);
             }
-            catch(Exception)
+            catch(Exception ex)
             {
-                return BadRequest(Messages.SOME_THING_WENT_WRONG);
+                _logger.Error("{ResBody}", new object[] { ex.Message });
+                return BadRequest(Responses.SOME_THING_WENT_WRONG);
             }
         }
     }

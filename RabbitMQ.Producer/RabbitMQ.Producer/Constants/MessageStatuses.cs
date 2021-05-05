@@ -10,5 +10,6 @@ namespace RabbitMQ.Consumer.Constants
         public const string ERROR = "ERROR";
         public const string PROCEED = "PROCEED";
         public const string LOGGED = "LOGGED";
+        public const string INPRODUCER = "INPRODUCER";
     }
 }

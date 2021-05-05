@@ -10,7 +10,6 @@ using RabbitMQ.Producer.Dtos.Config;
 using RabbitMQ.Producer.Services;
 using System;
 using System.IO;
-using AutoMapper;
 using RabbitMQ.Producer.Utilities;
 using Quartz.Spi;
 using Quartz.Impl;
@@ -22,6 +21,7 @@ using System.Linq;
 using RabbitMQ.Producer.Constants;
 using RabbitMQ.Producer.Middlewares.Logging;
 using Microsoft.AspNetCore.Http;
+using RabbitMQ.Producer.Queues.RabbitMQ;
 
 namespace RabbitMQ.Producer
 {
@@ -29,6 +29,7 @@ namespace RabbitMQ.Producer
     {
         public IConfiguration Configuration { get; set; }
         private AppConfig _config;
+        private CustomRabbitMQ CustomRabbitMQ;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -40,13 +41,14 @@ namespace RabbitMQ.Producer
             SetAppSettingsFile();
 
             _config = Configuration.Get<AppConfig>();
+            
 
             services.AddControllers();
             
             services.AddAutoMapper(new Type[] { typeof(AutoMapperProfile) });
 
             services.AddDbContext<DataContext>
-                    (options => options.UseSqlServer(_config.ConnectionString));
+                    (options => options.UseSqlServer(_config.DBConfig.ConnectionString), ServiceLifetime.Transient);
 
             services.AddSwaggerGen(c =>
             {
@@ -63,12 +65,17 @@ namespace RabbitMQ.Producer
             // Add our job
             services.AddTransient<HandleReDeliveryMessages>();
             services.AddSingleton(new JobSchedule(jobType: typeof(HandleReDeliveryMessages),
-                cronExpression: _config.ReDelivery.JobRunTime)); // for every day at 1 am // 0/5 * * * * for every 5 sec task
+                cronExpression: _config.ReDelivery.JobRunTime));
 
-            services.AddScoped<IQueueService, QueueService>();
-            services.AddScoped<IReDeliveryService, ReDeliveryService>();
+            services.AddTransient<IQueueService, QueueService>();
+            services.AddTransient<IReDeliveryService, ReDeliveryService>();
             services.AddSingleton<ICustomLoggingConfig, CustomLoggingConfig>();
+           
             services.AddSingleton(_config);
+
+
+            CustomRabbitMQ = new CustomRabbitMQ(_config, services.BuildServiceProvider());
+            services.AddSingleton(CustomRabbitMQ);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

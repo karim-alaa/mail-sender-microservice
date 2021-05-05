@@ -1,12 +1,17 @@
 ﻿using AutoMapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using RabbitMQ.Consumer.Constants;
 using RabbitMQ.Producer.Dtos;
 using RabbitMQ.Producer.Dtos.Config;
 using RabbitMQ.Producer.Models;
+using RabbitMQ.Producer.Queues.RabbitMQ;
+using Serilog;
 using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -21,21 +26,21 @@ namespace RabbitMQ.Producer.Services
 
     public class QueueService : IQueueService
     {
-
-        private readonly AppConfig _config;
         private readonly Data.DataContext _context;
-         
-        public QueueService(AppConfig config, Data.DataContext context)
+        private readonly CustomRabbitMQ _customRabbitMQ;
+        
+
+        public QueueService(Data.DataContext context, CustomRabbitMQ customRabbitMQ)
         {
-            _config = config;
             _context = context;
+            _customRabbitMQ = customRabbitMQ;
         }
 
         public async Task<bool> ScheduleMessage(Message message)
         {
             try
             {
-                message.Status = MessageStatuses.INQUEUE;
+                message.Status = MessageStatuses.INPRODUCER;
                 message.UpdatedAt = DateTime.Now;
 
                 await _context.Messages.AddAsync(message);
@@ -53,18 +58,15 @@ namespace RabbitMQ.Producer.Services
 
         public async Task<bool> ReScheduleMessage(Message message)
         {
-            message.Status = MessageStatuses.INQUEUE;
+            message.Status = MessageStatuses.INPRODUCER;
             message.UpdatedAt = DateTime.Now;
             message.ReDeliveryTimes++;
-
+            _context.Messages.Update(message);
+            await _context.SaveChangesAsync();
             try
             {
                 // publish the message
                 PublishMessage(message);
-
-                _context.Messages.Update(message);
-                await _context.SaveChangesAsync();
-
                 return true;
             }
             catch (Exception)
@@ -75,17 +77,14 @@ namespace RabbitMQ.Producer.Services
 
         private void PublishMessage(Message message)
         {
-            var factory = new ConnectionFactory
-            {
-                Uri = new Uri($"amqp://{_config.MassTransit.Username}:{_config.MassTransit.Password}@{_config.MassTransit.Host}:{_config.MassTransit.Port}")
-            };
-            // TODO: check if you need to keep connection and channel created only one time?
-            using var connection = factory.CreateConnection();
-            using var channel = connection.CreateModel();
-
-            // use name of queue if you don't have exchanges and bindings by routing key!
-            // cause we use the default exchange which uses queue name instead of routing key
-            channel.BasicPublish(message.ExchangeName, message.RoutingKey, null, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message)));
+            // It is undesirable to keep many TCP connections open at the same time
+            IModel channel = _customRabbitMQ.GetChannel();
+            IBasicProperties properties = _customRabbitMQ.GetBasicProperties();
+            ulong sequenceNumber = channel.NextPublishSeqNo;
+          
+            _customRabbitMQ.AddOutstandingConfirm(sequenceNumber, message.Id);
+            channel.BasicPublish(message.ExchangeName, message.RoutingKey, properties, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message)));
+            Console.WriteLine("Message Published");
         }
     }
 }

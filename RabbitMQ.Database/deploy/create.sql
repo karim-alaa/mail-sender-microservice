@@ -10,9 +10,11 @@ GO
 CREATE TABLE Messages (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
     ExchangeName varchar(100),
+    SequenceNumber varchar(50),
     RoutingKey varchar(100),
     Body Text,
     ReDeliveryTimes int,
+    NAckesTimes int,
     Status varchar(50),
     CreatedAt datetime,
     UpdatedAt datetime
@@ -25,7 +27,9 @@ CREATE TABLE StuckMessages (
     RoutingKey varchar(100),
     Body Text,
     ReDeliveryTimes int,
+    NAckesTimes int,
     Status varchar(50),
+    StuckReason varchar(50),
     CreatedAt datetime,
     UpdatedAt datetime
 );
