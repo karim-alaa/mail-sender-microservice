@@ -160,7 +160,7 @@ namespace RabbitMQ.Producer.Queues.RabbitMQ
                 using (var transaction = _context.Database.BeginTransaction())
                 {
                     if (messages.Count >= _config.DBConfig.DeservedBulk)
-                        await _context.BulkUpdateAsync(messages, options => options.PropertiesToInclude = new List<string>() { nameof(Message.Status), nameof(Message.UpdatedAt) });
+                        await _context.BulkUpdateAsync(messages, options => options.PropertiesToInclude = new List<string>() { nameof(Message.Status), nameof(Message.UpdatedAt), nameof(Message.NAckesTimes) });
                     else
                         _context.Messages.UpdateRange(messages);
                     
