@@ -48,7 +48,7 @@ namespace RabbitMQ.Producer
             services.AddAutoMapper(new Type[] { typeof(AutoMapperProfile) });
 
             services.AddDbContext<DataContext>
-                    (options => options.UseSqlServer(_config.DBConfig.ConnectionString), ServiceLifetime.Transient);
+                    (options => options.UseSqlServer(_config.DBConfig.ConnectionString));
 
             services.AddSwaggerGen(c =>
             {
