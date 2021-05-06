@@ -44,7 +44,8 @@ namespace RabbitMQ.Producer.Middlewares.Logging
             }
             catch (Exception ex) 
             { 
-                Console.WriteLine($"Error While Logging: {ex.Message}"); 
+                Console.WriteLine($"Error While Loggaing: {ex.Message}");
+                _logger.Error("{ResBody}", ex.Message);
             }
 
             try
@@ -60,19 +61,13 @@ namespace RabbitMQ.Producer.Middlewares.Logging
 
                 memStream.Position = 0;
 
-                if (context.Response.StatusCode >= 400)
+                if (context.Response.StatusCode >= 200)
                 {
-                    // Get response body here after next.Invoke()
                     resBody = new StreamReader(memStream).ReadToEnd();
                     memStream.Position = 0;
-                    await memStream.CopyToAsync(originalBody);
-                    context.Response.Body = originalBody;
                 }
-                else
-                {
-                    await memStream.CopyToAsync(originalBody);
-                    context.Response.Body = originalBody;
-                }
+                await memStream.CopyToAsync(originalBody);
+                context.Response.Body = originalBody;
             }
             finally
             {
