@@ -2,12 +2,18 @@
 using MailKit.Security;
 using MimeKit;
 using MimeKit.Text;
+using RabbitMQ.Consumer.Data;
 using RabbitMQ.Consumer.Dtos;
 using RabbitMQ.Consumer.Dtos.Config;
+using RabbitMQ.Consumer.Models;
+using RabbitMQ.Consumer.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace RabbitMQ.Consumer.Services
@@ -16,15 +22,16 @@ namespace RabbitMQ.Consumer.Services
     public interface IMailService
     {
         Task<bool> SendMail(EmailRequestDto emailDto);
-        Task LogStuckMail(string messageBody);
     }
 
     public class MailService : IMailService
     {
         private readonly AppConfig _config;
-        public MailService(AppConfig config)
+        private readonly IHelper _helper;
+        public MailService(AppConfig config, IHelper helper)
         {
             _config = config;
+            _helper = helper;
         }
 
         public async Task<bool> SendMail(EmailRequestDto emailDto)
@@ -32,10 +39,6 @@ namespace RabbitMQ.Consumer.Services
             var message = new MimeMessage
             {
                 Subject = emailDto.Subject,
-                Body = new TextPart(TextFormat.Text)
-                {
-                    Text = emailDto.Body
-                }
             };
 
             if (emailDto.From != _config.Smtp.Username)
@@ -60,39 +63,37 @@ namespace RabbitMQ.Consumer.Services
                     message.Bcc.Add(MailboxAddress.Parse(bcc));
             }
 
-            // SMTP Setup
-            using var client = new SmtpClient();
-            client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-            await client.ConnectAsync(_config.Smtp.Host, _config.Smtp.Port, SecureSocketOptions.StartTls);
-            await client.AuthenticateAsync(_config.Smtp.Username, _config.Smtp.Password);
-            await client.SendAsync(message);
-            await client.DisconnectAsync(true);
 
+            BodyBuilder MailBodyBuilder = new () { TextBody = emailDto.Body };
+
+            // Add Attachments
+            List<string> Attachments = new();
+            if (emailDto.Attachments != null)
+            {
+                Random rand = new();
+                foreach (string attachmentDataURL in emailDto.Attachments)
+                {
+                    string FileName = _helper.Base64ToFile(attachmentDataURL, rand);
+                    MailBodyBuilder.Attachments.Add(FileName);
+                    Attachments.Add(FileName);
+                }
+            }
+
+            message.Body = MailBodyBuilder.ToMessageBody();
+
+            // SMTP Setup
+               
+            using (var client = new SmtpClient())
+            {
+                client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                await client.ConnectAsync(_config.Smtp.Host, _config.Smtp.Port, SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync(_config.Smtp.Username, _config.Smtp.Password);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+            }
+          
+            _helper.RemoveTempFiles(Attachments);
             return true;
         }
-   
-        public async Task LogStuckMail(string messageBody)
-        {
-            var message = new MimeMessage
-            {
-                Subject = "Stuck Mail, in RabbitMQ RetryService - Mail Consumer",
-                Body = new TextPart(TextFormat.Text)
-                {
-                    Text = messageBody
-                }
-            };
-
-            message.From.Add(MailboxAddress.Parse(_config.Smtp.Username));
-            message.To.Add(MailboxAddress.Parse(_config.Smtp.Username));
-
-            // SMTP Setup
-            using var client = new SmtpClient();
-            client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-            await client.ConnectAsync(_config.Smtp.Host, _config.Smtp.Port, SecureSocketOptions.StartTls);
-            await client.AuthenticateAsync(_config.Smtp.Username, _config.Smtp.Password);
-            await client.SendAsync(message);
-            await client.DisconnectAsync(true);
-        }
-
     }
 }

@@ -16,5 +16,6 @@ namespace RabbitMQ.Consumer.Data
         }
 
         public DbSet<Message> Messages { get; set; }
+        public DbSet<MessageErrorLog> MessagesErrorLogs { get; set; }
     }
 }

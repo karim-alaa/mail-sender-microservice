@@ -18,5 +18,6 @@ namespace RabbitMQ.Producer.Dtos
         public List<string> To { get; set; }
         public List<string> CC { get; set; }
         public List<string> BCC { get; set; }
+        public List<string> Attachments { get; set; }
     }
 }

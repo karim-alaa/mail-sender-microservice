@@ -23,7 +23,6 @@ namespace RabbitMQ.Producer.Models
         public string Status { get; set; }
         public string StuckReason { get; set; }
         public int ReDeliveryTimes { get; set; }
-        public int NAckesTimes { get; set; }
         public DateTime CreatedAt {get;set;}
         public DateTime UpdatedAt {get;set;}
     }

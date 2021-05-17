@@ -56,9 +56,7 @@ namespace RabbitMQ.Producer.Services
                     stuckMessage.StuckReason = MessageStuckReasons.MAX_RETRY_EXCEED;
                     await _context.StuckMessages.AddAsync(stuckMessage);
 
-                    message.Status = MessageStatuses.LOGGED;
-                    message.UpdatedAt = DateTime.Now;
-                    _context.Messages.Update(message);
+                    _context.Messages.Remove(message);
 
                     await _context.SaveChangesAsync();
                     transaction.Commit();

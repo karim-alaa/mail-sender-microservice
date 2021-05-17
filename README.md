@@ -4,6 +4,9 @@ Simple, high available microservices with RabbitMQ responsible for sending huge 
 # High-Level Architecture
 ![High-Level Architecture](https://user-images.githubusercontent.com/29948653/114420264-75efcb00-9bb4-11eb-8d8e-cee832b9f9c7.png)
 
+# Simple Sequence Digram
+![RabbitMQSequenceDigram](https://user-images.githubusercontent.com/29948653/118473654-8262c880-b70a-11eb-85b9-079456999147.png)
+
 # Technologies
 * C#, Console App, Web API App
 * .Net Core
@@ -62,3 +65,22 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
   :heavy_check_mark: High availability Queue with RabbitMQ Clusters (Quorum  Queues)<br/>
   :heavy_check_mark: Easy Deployment & Import customized definitions<br/>
   :x: Nginx Load Balancer
+
+
+
+
+  # How It Works
+  in the few lines below we will demonstrate the message life cycle and how it affcted in the producer and consumer.
+
+  ## Producer
+  Message should sent to producer using https request 'with new Guid' for each new message as error will returned if your trying to resend the message "once the message is in producer, don't worry; it will take care about it's delivery".
+  
+  Message attchement will be sent as Base64 URL enconded such as 'data:@file/json;base64,CONTENT'
+  
+  The producer will try to send the message to the queue, save outstanding messages in cache and waiting async for message confirmation from the queue itself, the current status of message in this case will be inproducer and it will be changed to inqueue once the queue confirm delivery.
+  
+  ## Consumer
+  Consumer should always listining for any new message, catch message and try to send it via mail server and change message status to procceed or error, for any mail server error a new log with error will be recorded.
+  
+  ## Background Job
+  A job launching from producer to redelivery messages with status error or inproducer.

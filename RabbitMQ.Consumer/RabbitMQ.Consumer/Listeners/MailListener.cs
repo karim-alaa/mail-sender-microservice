@@ -96,8 +96,6 @@ namespace RabbitMQ.Consumer.Listeners
                     Message messageRequestDone = JsonConvert.DeserializeObject<Message>(message);
                     EmailRequestDto emailRequestDto = JsonConvert.DeserializeObject<EmailRequestDto>(messageRequestDone.Body);
 
-                    Console.WriteLine(messageRequestDone.Body);
-
                     using (var scope = _provider.CreateScope())
                     {
                         var _context = scope.ServiceProvider.GetService<DataContext>();
@@ -109,9 +107,7 @@ namespace RabbitMQ.Consumer.Listeners
                                 Console.WriteLine("Mail Sent!");
 
                                 channel.BasicAck(ea.DeliveryTag, false);
-                                messageRequestDone.Status = MessageStatuses.PROCEED;
-                                messageRequestDone.UpdatedAt = DateTime.Now;
-                                _context.Messages.Update(messageRequestDone);
+                                _context.Messages.Remove(messageRequestDone);
                                 await _context.SaveChangesAsync();
                                 Console.WriteLine("message status updated to proceed");
                             }
@@ -121,9 +117,12 @@ namespace RabbitMQ.Consumer.Listeners
                                 channel.BasicNack(ea.DeliveryTag, false, true);
                             }
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
-                            // Record may be delete, or exchange server down
+                            // log sending error
+                            MessageErrorLog messageErrorLog = messageRequestDone.PrepareMessageError(ex.Message);
+                            await _context.MessagesErrorLogs.AddAsync(messageErrorLog);
+                            await _context.SaveChangesAsync();
                         }
                     }
 

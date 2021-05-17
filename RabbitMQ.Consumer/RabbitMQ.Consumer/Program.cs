@@ -10,6 +10,7 @@ using RabbitMQ.Consumer.Data;
 using RabbitMQ.Consumer.Dtos.Config;
 using RabbitMQ.Consumer.Listeners;
 using RabbitMQ.Consumer.Services;
+using RabbitMQ.Consumer.Utilities;
 using System;
 using System.IO;
 using System.Text;
@@ -19,7 +20,7 @@ namespace RabbitMQ.Consumer
     public class Program
     {
         private static IConfiguration _iconfiguration;
-        public static void Main(string[] args)
+        public static void Main()
         {
 
             // Add appsettings
@@ -28,12 +29,14 @@ namespace RabbitMQ.Consumer
             var _config = _iconfiguration.Get<AppConfig>();
 
             // Setup DI
-            var serviceProvider = new ServiceCollection()
+            IServiceCollection serviceCollection = new ServiceCollection()
+                .AddSingleton<IHelper, Helper>()
                 .AddSingleton<IMailService, MailService>()
                 .AddSingleton<IListener, MailListener>()
                 .AddSingleton(_config)
-                .AddDbContext<DataContext>(options => options.UseSqlServer(_config.ConnectionString))
-                .BuildServiceProvider();
+                .AddDbContext<DataContext>(options => options.UseSqlServer(_config.ConnectionString));
+
+            ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
             // Activate Mail Listener
             var _mailListener = serviceProvider.GetService<IListener>();

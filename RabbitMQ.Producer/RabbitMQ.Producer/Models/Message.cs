@@ -21,7 +21,6 @@ namespace RabbitMQ.Producer.Models
         public string RoutingKey { get; set; }
         public int ReDeliveryTimes { get; set; }
         public string SequenceNumber { get; set; }
-        public int NAckesTimes { get; set; }
         public string Body { get; set; }
         public string Status {get;set;}
         public DateTime CreatedAt {get;set;}

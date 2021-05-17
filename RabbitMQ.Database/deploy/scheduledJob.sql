@@ -38,7 +38,8 @@ EXEC @ReturnCode = msdb.dbo.sp_add_jobstep @job_id=@jobId, @step_name=N'DataRete
 		@os_run_priority=0, @subsystem=N'TSQL', 
 		@command=N'use retry_service
 delete from Messages where CreatedAt < dateadd(week,-2,getdate())
-delete from Logs where TimeStamp < dateadd(week,-2,getdate())', 
+delete from Logs where TimeStamp < dateadd(week,-2,getdate())
+delete from MessagesErrorLogs where CreatedAt < dateadd(week,-4,getdate())', 
 		@database_name=N'master', 
 		@flags=0
 IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback

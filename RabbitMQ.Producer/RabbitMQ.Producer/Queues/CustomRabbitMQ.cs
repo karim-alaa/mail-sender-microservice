@@ -146,8 +146,6 @@ namespace RabbitMQ.Producer.Queues.RabbitMQ
                 List<StuckMessage> stuckMessages = new();
                 foreach (Message msg in messages)
                 {
-                    msg.NAckesTimes++;
-
                     // prepare stuck message record
                     StuckMessage stuckMessage = _mapper.Map<StuckMessage>(msg);
                     stuckMessage.StuckReason = MessageStuckReasons.QUEUE_NACK;
@@ -160,14 +158,14 @@ namespace RabbitMQ.Producer.Queues.RabbitMQ
                 using (var transaction = _context.Database.BeginTransaction())
                 {
                     if (messages.Count >= _config.DBConfig.DeservedBulk)
-                        await _context.BulkUpdateAsync(messages, options => options.PropertiesToInclude = new List<string>() { nameof(Message.Status), nameof(Message.UpdatedAt), nameof(Message.NAckesTimes) });
+                        await _context.BulkDeleteAsync(messages, options => options.PropertiesToInclude = new List<string>() { nameof(Message.Status), nameof(Message.UpdatedAt) });
                     else
-                        _context.Messages.UpdateRange(messages);
+                        _context.Messages.RemoveRange(messages);
                     
                     if (stuckMessages.Count >= _config.DBConfig.DeservedBulk)
                         await _context.BulkInsertAsync(stuckMessages);
                     else
-                        _context.Messages.UpdateRange(messages);
+                        await _context.StuckMessages.AddRangeAsync(stuckMessages);
 
                     await _context.SaveChangesAsync();
                     transaction.Commit();

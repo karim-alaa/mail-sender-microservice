@@ -73,8 +73,9 @@ namespace RabbitMQ.Producer
            
             services.AddSingleton(_config);
 
+            var serviceProvider = services.BuildServiceProvider();
 
-            CustomRabbitMQ = new CustomRabbitMQ(_config, services.BuildServiceProvider());
+            CustomRabbitMQ = new CustomRabbitMQ(_config, serviceProvider);
             services.AddSingleton(CustomRabbitMQ);
         }
 
