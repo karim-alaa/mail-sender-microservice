@@ -26,7 +26,6 @@ CREATE TABLE StuckMessages (
     RoutingKey varchar(100),
     Body text,
     ReDeliveryTimes int,
-
     Status varchar(50),
     StuckReason varchar(50),
     CreatedAt datetime,

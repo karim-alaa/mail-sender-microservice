@@ -24,7 +24,7 @@ docker run -d --rm --net rabbits `
 --name rabbit-1 `
 -p 8081:15672 `
 -p 9091:5672 `
-rabbitmq:3.8-management
+rabbitmq:3.9-management 
 
 Write-Output "Node 1 Created. check http://localhost:8081"
 
@@ -37,7 +37,7 @@ docker run -d --rm --net rabbits `
 --name rabbit-2 `
 -p 8082:15672 `
 -p 9092:5672 `
-rabbitmq:3.8-management
+rabbitmq:3.9-management
 
 Write-Output "Node 2 Created. check http://localhost:8082"
 
@@ -50,17 +50,17 @@ docker run -d --rm --net rabbits `
 --name rabbit-3 `
 -p 8083:15672 `
 -p 9093:5672 `
-rabbitmq:3.8-management
+rabbitmq:3.9-management
 
 Write-Output "Node 3 Created. check http://localhost:8083"
 
 # Wait till the instances being up and running
 Write-Output "Wait till the instances being up and running..."
 for($j = 1; $j -lt 80; $j++ )
-    {
-        Start-Sleep -s 1
-        Write-Progress -Id 1 -Activity Building -Status 'Progress' -PercentComplete $j -CurrentOperation Running-RabbitMQ-Instances
-    }
+{
+    Start-Sleep -s 1
+    Write-Progress -Id 1 -Activity Building -Status 'Progress' -PercentComplete $j -CurrentOperation Running-RabbitMQ-Instances
+}
 
 # Enable federation plugin
 docker exec -it rabbit-1 rabbitmq-plugins enable rabbitmq_federation >$null 2>&1

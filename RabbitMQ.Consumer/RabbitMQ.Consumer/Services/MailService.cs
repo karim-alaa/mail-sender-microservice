@@ -41,8 +41,10 @@ namespace RabbitMQ.Consumer.Services
                 Subject = emailDto.Subject,
             };
 
+            /*
             if (emailDto.From != _config.Smtp.Username)
                 return false;
+            */
 
             // ignore from email right now!
             // TODO: may we need to handle the from email later

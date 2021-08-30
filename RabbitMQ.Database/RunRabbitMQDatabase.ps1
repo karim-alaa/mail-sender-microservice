@@ -2,7 +2,7 @@
 #docker run -d --rm --net rabbits -p 1433:1433 --name database rabbitmq-apps/database:latest
 
 
-docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=P@ssW0rdC00MP!!EX" `
+docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=P@ssW0rdC00MP!!EX#" `
    --name database `
    -h database `
    --net rabbits `
@@ -21,15 +21,15 @@ for($j = 1; $j -lt 15; $j++ )
     }
 
 docker exec -it database /opt/mssql-tools/bin/sqlcmd `
-   -S localhost -U SA -P "P@ssW0rdC00MP!!EX" `
-   -Q "ALTER LOGIN SA WITH PASSWORD='W0rd@Pass#WE1'"
+   -S localhost -U SA -P "P@ssW0rdC00MP!!EX#" `
+   -Q "ALTER LOGIN SA WITH PASSWORD='W0rd@Pass#WE1#'"
 
 Write-Output "SA Password Changed"
 
 docker cp ./deploy/create.sql database:/tmp/
 docker cp ./deploy/scheduledJob.sql database:/tmp/
 
-docker exec -it database /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "W0rd@Pass#WE1" -i ./tmp/create.sql
-docker exec -it database /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "W0rd@Pass#WE1" -i ./tmp/scheduledJob.sql
+docker exec -it database /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "W0rd@Pass#WE1#" -i ./tmp/create.sql
+docker exec -it database /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "W0rd@Pass#WE1#" -i ./tmp/scheduledJob.sql
 
 Write-Output "Database imported!"
